@@ -77,8 +77,6 @@ while True:
     if is_king_in_check(turn, board):
         print(f"{turn.capitalize()} is in check")
 
-    get_player_move(turn)
+
+    get_player_move(player_color)
     turn = "black" if turn == "white" else "white"
-
-    
-

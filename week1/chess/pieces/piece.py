@@ -1,3 +1,5 @@
+from game import GameState
+
 class Piece():
 
     def __init__(self, color, location):

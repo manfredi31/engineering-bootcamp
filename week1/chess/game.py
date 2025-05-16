@@ -1,10 +1,3 @@
-from pieces import Rook
-from pieces import Bishop
-from pieces import King
-from pieces import Knight
-from pieces import Pawn
-from pieces import Queen
-from pieces import Piece
 from copy import deepcopy
 
 class GameState:
@@ -25,6 +18,7 @@ class GameState:
         else:
             cls.black_active.remove(piece)
 
+
 def is_king_in_check(color, board):
     king_pos = None
     
@@ -40,7 +34,7 @@ def is_king_in_check(color, board):
     # Find the king
     for row in board:
         for piece in row:
-            if piece and isinstance(piece, King) and piece._color == color:
+            if piece and piece.__class__.__name__ == "King" and piece._color == color:
                 king_pos = piece._location
                 break #breaks out of inner loop
         
@@ -60,27 +54,80 @@ def is_king_in_check(color, board):
     return False
 
 def is_checkmate(color, board):
-
-# Checkmate = check + no escape moves
-
-# Possible escape moves:
-# - move the king to safe square
-# - place a piece between attacker and king (possible for sliding pieces)
-# - capture attacking piece
-
+    # First check if the king is in check
     if not is_king_in_check(color, board):
         return False
-
-    opponent_active_pieces = GameState.black_active if color == "white" else GameState.white_active
-    for piece in opponent_active_pieces:
+    
+    # Find the king
+    king_pos = None
+    for r in range(8):
+        for c in range(8):
+            piece = board[r][c]
+            if piece and piece.__class__.__name__ == "King" and piece._color == color:
+                king_pos = (r, c)
+                break
+        if king_pos:
+            break
+            
+    # Get the king piece
+    king = board[king_pos[0]][king_pos[1]]
+    
+    # Check if king can move to safety
+    for move in king.valid_moves(board):
+        # Save the current state
+        current_pos = king._location
+        target_pos = move
+        target_piece = board[target_pos[0]][target_pos[1]]
+        
+        # Try the move
+        board[target_pos[0]][target_pos[1]] = king
+        board[current_pos[0]][current_pos[1]] = None
+        king._location = target_pos
+        
+        # Check if still in check
+        still_in_check = is_king_in_check(color, board)
+        
+        # Undo the move
+        king._location = current_pos
+        board[current_pos[0]][current_pos[1]] = king
+        board[target_pos[0]][target_pos[1]] = target_piece
+        
+        # If this move escapes check, not checkmate
+        if not still_in_check:
+            return False
+    
+    # Get other pieces of the same color
+    player_pieces = []
+    for r in range(8):
+        for c in range(8):
+            piece = board[r][c]
+            if piece and piece._color == color and piece.__class__.__name__ != "King":
+                player_pieces.append(piece)
+    
+    # Check if any other piece can block or capture to get out of check
+    for piece in player_pieces:
         for move in piece.valid_moves(board):
-            # Simulate the move on a copy of the board
-            board_copy = deepcopy(board)
-            piece_copy = board_copy[piece._location[0]][piece._location[1]]
-            board_copy[move[0]][move[1]] = piece_copy
-            board_copy[piece_copy._location[0]][piece_copy._location[1]] = None
-            piece_copy._location = move
-            if not is_king_in_check(color, board_copy):
+            # Save the current state
+            current_pos = piece._location
+            target_pos = move
+            target_piece = board[target_pos[0]][target_pos[1]]
+            
+            # Try the move
+            board[target_pos[0]][target_pos[1]] = piece
+            board[current_pos[0]][current_pos[1]] = None
+            piece._location = target_pos
+            
+            # Check if still in check
+            still_in_check = is_king_in_check(color, board)
+            
+            # Undo the move
+            piece._location = current_pos
+            board[current_pos[0]][current_pos[1]] = piece
+            board[target_pos[0]][target_pos[1]] = target_piece
+            
+            # If this move escapes check, not checkmate
+            if not still_in_check:
                 return False
-
+    
+    # If no moves escape check, it's checkmate
     return True

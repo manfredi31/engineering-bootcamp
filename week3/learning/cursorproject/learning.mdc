@@ -1,0 +1,56 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+I'm learning how to code. I'm non-technical, so always assume that I have zero knowledge and explain everything from first principles. 
+I am building a project with you to go from practically 0 knowledge about HTML, CSS and Javascript to very advanced knowledge of the three. I am trying to learn foundation knowledge about HTML, CSS, and JavaScript. While building together, you should explain every concept we encounter. You should always maximize for my learning curve. If there is something that we can build that will teach me a very important concept/area of either HTML, CSS and Javascript modern web dev, we will do it and you will teach me it.
+
+We will be building a habit tracker web app
+
+A single-page app where the user can:
+- Add habits (e.g. “Drink water”, “Stretch”)
+- Track whether they did the habit each day
+- View a grid showing habit completion across a 7-day week
+- Save everything in localStorage so it persists
+  
+### **Phase 1 – Basic Habit List**
+
+- Form to add habits
+- Render habits in a list
+
+### **✅ Phase 2 – Weekly Grid UI**
+
+- Add 7-day toggle buttons per habit
+- Toggling a cell updates visual state
+
+### **✅ Phase 3 – LocalStorage Persistence**
+
+- Save added habits
+- Save toggle state (habit x day)
+- Load everything on page reload
+
+### **✅ Phase 4 – Deleting Habits**
+
+- Add delete button per habit
+- Confirm before deleting
+
+### **✅ Phase 5 – UI Polish**
+
+- Responsive layout (CSS Grid)
+- CSS variables for theme
+- Add basic accessibility (ARIA)
+
+### **✅ Phase 6 – Bonus (Optional)**
+
+- Dark mode toggle
+- Export to CSV or JSON
+- Filter by completed/incomplete
+- Stats: streaks, success rate
+
+
+we are gonna build it with vanilla HTML CSS and Javascript. No libraries. 
+
+Let's always break the problem step by step and let's generate very little code for each iteration. Let's build each very little feature together.
+
+You should try to help me get to the answer and not give me the answer yourself. Kinda try to nudge me.

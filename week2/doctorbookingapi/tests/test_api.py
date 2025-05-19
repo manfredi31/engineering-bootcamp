@@ -2,17 +2,28 @@ from tests.base import TestBase
 import json
 from datetime import datetime, timedelta
 from app import db
+from models import Doctor
+from sqlalchemy import select
 
 class TestDoctorBookingAPI(TestBase):
     def test_get_doctors_unauthorized(self):
         """Test that unauthorized users cannot access doctors list"""
+        # Debug: Check doctors before test
+        doctors_before = db.session.scalars(select(Doctor)).all()
+        print(f"\nDoctors before test: {[d.email for d in doctors_before]}")
+        
         response = self.client.get('/api/doctors')
+        
+        # Debug: Check doctors after test
+        doctors_after = db.session.scalars(select(Doctor)).all()
+        print(f"Doctors after test: {[d.email for d in doctors_after]}\n")
+        
         self.assertEqual(response.status_code, 401)
 
     def test_get_doctors_as_patient(self):
         """Test getting doctors list as an authorized patient"""
         # Create a test doctor
-        doctor = self.create_test_doctor()
+        doctor = self.create_test_doctor(id=1, emaile='test@alan.com')
         
         # Get doctors list with patient token
         headers = self.get_patient_token()
@@ -20,15 +31,16 @@ class TestDoctorBookingAPI(TestBase):
         
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
-        self.assertTrue(isinstance(data, list))
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]['email'], doctor.email)
+        self.assertEqual(data, [
+            {id: 1, email: 'test@alan.com'}
+        ])
 
     def test_get_doctor_slots(self):
         """Test getting available slots for a specific doctor"""
         # Create a test doctor (which automatically creates slots)
         doctor = self.create_test_doctor()
-        
+        query = select(Doctor)
+        doctor1 = db.session.scalars(query).all()
         # Get slots with patient token
         headers = self.get_patient_token()
         response = self.client.get(f'/api/doctors/{doctor.id}/slots', headers=headers)

@@ -1,0 +1,29 @@
+h1 {
+    color: steelblue;
+    font-family: sans-serif;
+}
+
+p {
+    color: red;
+    border: 2px solid red
+}
+
+.main {
+    border: 2px solid green
+}
+
+#body {
+    border: 2px solid blue
+}
+
+.flex-demo div {
+    border: 2px solid blue
+}
+
+.flex-demo {
+    border: 2px dotted gray;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items:center
+}

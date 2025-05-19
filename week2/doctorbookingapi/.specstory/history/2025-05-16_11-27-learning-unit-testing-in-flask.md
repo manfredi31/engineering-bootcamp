@@ -1572,7 +1572,188 @@ def test_slot_status(self):
 
 Let's break down what's happening:
 
-1
+1. **Test Steps**:
+   - Creates a doctor (which creates available slots)
+   - Gets a patient token (for authentication)
+   - Checks slot is not booked (passes)
+   - Books the slot
+   - Checks slot is booked (passes)
+   - Checks slot was booked by this patient (fails)
+
+2. **The API Code** that's causing the issue:
+```python
+@bp.route("/slots/<int:slot_id>", methods=["GET"])
+@jwt_required()
+def slot_status(slot_id):
+    stmt = select(Slot).where(Slot.id == slot_id)
+    slot = db.session.scalar(stmt)
+    
+    if not slot:
+        return jsonify({"error": "Slot not found"}), 404
+        
+    return jsonify({
+        "id": slot.id,
+        "doctor_email": slot.doctor.email,
+        "start_time": slot.start_time.isoformat(),
+        "is_booked": bool(slot.appointment),
+        "booked_by_you": slot.appointment.patient_id == get_jwt_identity() if slot.appointment else False
+    })
+```
+
+3. **The Problem**:
+   - When we check `booked_by_you`, we're getting `False` when it should be `True`
+   - This means either:
+     a) `slot.appointment.patient_id` is not what we expect, or
+     b) `get_jwt_identity()` is not returning what we expect
+
+4. **Let's Debug**:
+   - In the booking endpoint, we use `patient_id = get_jwt_identity()`
+   - In the status endpoint, we use the same `get_jwt_identity()`
+   - These should match, but they're not
+
+Let me check how we're creating the JWT token in the test base class:
+
+```python
+def get_patient_token(self, email="patient@test.com", password="test123"):
+    """Helper method to get a patient's JWT token"""
+    patient = Patient.query.filter_by(email=email).first()
+    if not patient:
+        patient = self.create_test_patient(email, password)
+    return {"Authorization": f"Bearer {self.create_token(patient.id, 'patient')}"}
+
+def create_token(self, user_id, role):
+    """Helper method to create a JWT token"""
+    with self.app.app_context():
+        from flask_jwt_extended import create_access_token
+        return create_access_token(identity=user_id, additional_claims={"role": role})
+```
+
+The token creation looks correct. Let's add some debug logging to the slot status endpoint to see what's happening:
+
+---
+
+```diff
+      if not slot:
+          return jsonify({"error": "Slot not found"}), 404
+-         
++     
++     current_user_id = get_jwt_identity()
++     is_booked = bool(slot.appointment)
++     booked_by_you = False
++     
++     if is_booked:
++         booked_by_you = str(slot.appointment.patient_id) == str(current_user_id)
++         print(f"Debug - Patient IDs: appointment={slot.appointment.patient_id}, current_user={current_user_id}")
++         
+      return jsonify({
+          "id": slot.id,
+          "doctor_email": slot.doctor.email,
+          "start_time": slot.start_time.isoformat(),
+-         "is_booked": bool(slot.appointment),
+-         "booked_by_you": slot.appointment.patient_id == get_jwt_identity() if slot.appointment else False
++         "is_booked": is_booked,
++         "booked_by_you": booked_by_you
+      })
+```
+
+---
+
+I've modified the code to:
+1. Get the current user ID once
+2. Add type conversion to string (in case one is string and one is int)
+3. Add debug printing to see the actual values
+
+Now run the tests again and we'll see what values we're getting. This will help us understand if:
+1. The patient ID from the appointment is correct
+2. The current user ID from the JWT token is correct
+3. The comparison is working properly
+
+Would you like to run the tests and share what debug output you see? This will help us pinpoint exactly where the mismatch is happening.
+
+---
+
+_**User**_
+
+can you query and get all rows of the doctor table because I want to check if the doctor database gets frefreshed at every test
+
+---
+
+_**Assistant**_
+
+Yes! Let's modify the test to check the doctor table before and after each test. We can do this in two ways:
+
+1. Add a quick check to an existing test:
+
+---
+
+```diff
+      def test_get_doctors_unauthorized(self):
+          """Test that unauthorized users cannot access doctors list"""
++         # Debug: Check doctors before test
++         doctors_before = db.session.scalars(select(Doctor)).all()
++         print(f"\nDoctors before test: {[d.email for d in doctors_before]}")
++         
+          response = self.client.get('/api/doctors')
++         
++         # Debug: Check doctors after test
++         doctors_after = db.session.scalars(select(Doctor)).all()
++         print(f"Doctors after test: {[d.email for d in doctors_after]}\n")
++         
+          self.assertEqual(response.status_code, 401)
+  
+```
+
+---
+
+2. Let's also add a check in the base test class to see what happens between tests:
+
+---
+
+```diff
+  import json
+  import os
++ from sqlalchemy import select
+  
+  class TestConfig:
+```
+
+```diff
+          self.app_context.push()
+          db.create_all()
++         print(f"\n=== Setting up test: {self._testMethodName} ===")
++         print(f"Database created, checking doctors...")
++         doctors = db.session.scalars(select(Doctor)).all()
++         print(f"Doctors at start of test: {[d.email for d in doctors]}")
+  
+      def tearDown(self):
+          """Clean up after each test"""
++         print(f"\n=== Cleaning up test: {self._testMethodName} ===")
++         print(f"Checking doctors before cleanup...")
++         doctors = db.session.scalars(select(Doctor)).all()
++         print(f"Doctors at end of test: {[d.email for d in doctors]}")
+          db.session.remove()
+          db.drop_all()
+          self.app_context.pop()
++         print("Database dropped and cleaned up")
+  
+      def create_test_doctor(self, email="doctor@test.com", password="test123"):
+```
+
+---
+
+Now run the tests with:
+```bash
+python run_tests.py
+```
+
+This will show us:
+1. The state of the doctor table at the start of each test
+2. The state of the doctor table at the end of each test
+3. Whether the database is truly being reset between tests
+
+The output will help us confirm if our test isolation is working correctly - each test should start with an empty database and end with a clean slate for the next test.
+
+Let me know what output you see, and we can analyze if the database is being properly refreshed between tests!
 
 ---
 

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Block vs Inline Demo</title>
+  <style>
+    /* purely for visualisation – we'll learn real CSS next */
+    .nav           { border: 2px solid crimson;   background: #ffe6e6; margin-bottom: 8px; }
+    .a           { border: 2px solid crimson;   background: #ffe6e6; margin-bottom: 8px; }
+    .block       { border: 2px solid crimson;   background: #ffe6e6; margin-bottom: 8px; }
+    .inline      { border: 2px dashed royalblue; background: #e6f0ff; }
+    .sandbox     { border: 2px solid #999; padding: 12px; }
+  </style>
+</head>
+<body>
+
+<h1>Block–Inline Playground</h1>
+
+<nav class="nav">
+  <a class="a" href="google.com">Login</a>
+  <a class="a" href="facebook.com">Password</a>
+</nav>
+
+<!-- BLOCKS STACK -->
+<span class="block">div.one (block)</span>
+<span class="block">div.two (block)</span>
+<div class="block">div.three (block)</div>
+
+<!-- INLINES FLOW -->
+<p>
+  <p><span class="inline">span A (inline)</span></p>
+  <span class="inline">span B (inline)</span>
+  <span class="inline">span C (inline)</span>
+</p>
+
+<!-- MIX & WATCH -->
+<div class="block sandbox">
+  I’m a <code>div.block</code>.  
+  Inside me live some <span class="inline">inline spans</span>
+  that flow <span class="inline">horizontally</span>.
+</div>
+
+<!-- TRY TO SHRINK/EXPAND -->
+<p>
+  <a class="inline" href="#" style="padding:12px;">Anchor (inline – has padding)</a>
+  <a class="inline" href="#" style="width:120px; height:60px;">Width/height ignored – still inline</a>
+</p>
+
+<!-- CHANGING THE DEFAULT (sneak preview of CSS power) -->
+<p>
+  <a href="#" style="display:block; border:2px solid green; padding:8px;">Now I'm forced to act like a block</a>
+</p>
+
+</body>
+</html>

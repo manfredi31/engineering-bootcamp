@@ -4,6 +4,7 @@ from app.models import Doctor, Patient, Slot, Appointment
 from datetime import datetime, timedelta
 import json
 import os
+from sqlalchemy import select
 
 class TestConfig:
     TESTING = True
@@ -20,12 +21,21 @@ class TestBase(unittest.TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
+        print(f"\n=== Setting up test: {self._testMethodName} ===")
+        print(f"Database created, checking doctors...")
+        doctors = db.session.scalars(select(Doctor)).all()
+        print(f"Doctors at start of test: {[d.email for d in doctors]}")
 
     def tearDown(self):
         """Clean up after each test"""
+        print(f"\n=== Cleaning up test: {self._testMethodName} ===")
+        print(f"Checking doctors before cleanup...")
+        doctors = db.session.scalars(select(Doctor)).all()
+        print(f"Doctors at end of test: {[d.email for d in doctors]}")
         db.session.remove()
         db.drop_all()
         self.app_context.pop()
+        print("Database dropped and cleaned up")
 
     def create_test_doctor(self, email="doctor@test.com", password="test123"):
         """Helper method to create a test doctor"""

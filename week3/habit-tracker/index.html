@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Habit Tracker</h1>
+    </header>
+    
+    <main>
+        <section class="habit-form-container">
+            <form id="habit-form">
+                <h2>Add New Habit</h2>
+                <div class="form-control">
+                    <input type="text" id="habit-input" placeholder="Enter a new habit..." required>
+                    <div class="tag-selector">
+                        <label>Tag:</label>
+                        <div class="tag-options">
+                            <label class="tag-option">
+                                <input type="radio" name="habit-tag" value="life" checked>
+                                <span class="tag-label life-tag">Life</span>
+                            </label>
+                            <label class="tag-option">
+                                <input type="radio" name="habit-tag" value="work">
+                                <span class="tag-label work-tag">Work</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" id="add-habit-btn">Add Habit</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="habits-container">
+            <h2>My Habits</h2>
+            <div class="habits-columns">
+                <div class="habits-column">
+                    <h3 class="life-tag">Life Habits</h3>
+                    <div id="life-habits-list" class="habits-list">
+                        <!-- Life habits will be dynamically added here -->
+                    </div>
+                    <div id="life-empty-state" class="empty-state hidden">
+                        <p>No life habits yet. Add one to get started!</p>
+                    </div>
+                </div>
+                
+                <div class="habits-column">
+                    <h3 class="work-tag">Work Habits</h3>
+                    <div id="work-habits-list" class="habits-list">
+                        <!-- Work habits will be dynamically added here -->
+                    </div>
+                    <div id="work-empty-state" class="empty-state hidden">
+                        <p>No work habits yet. Add one to get started!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="dark-mode">
+            <button type="submit" id="dark-mode-btn">Toggle Dark Mode</button>
+        </section>
+
+    </main>
+
+    <!-- UUID Library from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

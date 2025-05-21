@@ -1,0 +1,50 @@
+#scoreContainer {
+    position: absolute;
+    top: 900px;
+    left: 425px;
+}
+
+/* Style for the main game container */
+#gameContainer {
+    /* Use flexbox for easy vertical alignment */
+    display: flex;
+    /* Stack elements vertically */
+    flex-direction: column;
+    /* Center items horizontally */
+    align-items: center;
+    /* Center items vertically in the viewport */
+    justify-content: center;
+    /* Take full viewport height */
+    min-height: 100vh;
+    /* Remove default margin */
+    margin: 0;
+    /* Remove default padding */
+    padding: 0;
+}
+
+/* Style for the score display */
+#scoreDisplay {
+    /* Pull the score up closer to the canvas */
+    margin-top: -200px;
+    /* Make text larger */
+    font-size: 24px;
+    /* Make text bold */
+    font-weight: bold;
+    /* Add some padding around the text */
+    padding: 10px;
+    /* Center the text */
+    text-align: center;
+}
+
+/* Make sure the body has no margins */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#gameOverContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%)
+}

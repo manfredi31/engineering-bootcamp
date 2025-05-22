@@ -101,3 +101,12 @@ def slot_status(slot_id):
         "is_booked": bool(slot.appointment),
         "booked_by_you": slot.appointment.patient_id == get_jwt_identity() if slot.appointment else False
     })
+
+
+@bp.route('/doctors/<string:specialty>', methods=['GET'])
+@jwt_required
+def get_doctors_by_specialty(specialty):
+    query = select(Doctor).where(Doctor.specialty == specialty)
+    doctors: list[Doctor] = db.session.scalars(query).all()
+
+    return jsonify([doctor.serialize() for doctor in doctors])

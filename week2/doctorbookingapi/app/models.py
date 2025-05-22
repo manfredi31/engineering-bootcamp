@@ -30,6 +30,7 @@ class Doctor(db.Model):
     email: so.Mapped[str] = so.mapped_column(sa.String(120), unique=True, nullable=False, index=True)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
     slots: so.Mapped[list["Slot"]] = so.relationship(back_populates="doctor", cascade="all, delete-orphan")
+    specialty: so.Mapped[str] = so.mapped_column(sa.String(), nullable=True, index=True)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

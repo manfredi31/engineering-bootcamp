@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+I am very very new to programming, and I want to learn about building fullstack applications. Frontend with React, and backend with Flask. 
+
+I have built a full backend at @doctorbookingapi  with authentication, database models, and different API endpoints, and now I want to build a React App on top of it. 
+
+
+You should assume I have 0 knowledge about React, Flask, and connecting React to Flask.
+
+The frontend is at @doctorbookingfrontend. 

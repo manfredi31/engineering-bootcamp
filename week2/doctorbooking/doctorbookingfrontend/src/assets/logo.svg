@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title">
+  <title id="title">Prescripto Logo</title>
+  <!-- Icon -->
+  <g>
+    <circle cx="30" cy="30" r="22" fill="#2463EB"/>
+    <!-- medical cross -->
+    <rect x="26" y="18" width="8" height="24" fill="#FFFFFF"/>
+    <rect x="18" y="26" width="24" height="8" fill="#FFFFFF"/>
+  </g>
+</svg>

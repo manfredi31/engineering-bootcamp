@@ -2466,7 +2466,7 @@ def slot_status(slot_id):
 Data flow:
 ```
 1. Client sends: GET /api/slots/1 with Bearer token
-2. @jwt_required checks token
+2. ©_required checks token
 3. Run query:
    SELECT slot.*, appointment.*
    FROM slot

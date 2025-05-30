@@ -35,16 +35,16 @@ const LoginModal = () => {
 
     const { mutate, isPending } = useMutation<AxiosResponse<LoginResponse>, AxiosError<{error: string}>, FieldValues>({
         mutationFn: (data: FieldValues) => 
-            axios.post('http://127.0.0.1:5000/auth/register', data),
+            axios.post('http://127.0.0.1:5000/auth/login', data),
         onSuccess: () => {
-            toast.success('Successfully registered!');
-            registerModal.onClose();
+            toast.success('Successfully loggedin!');
+            loginModal.onClose();
         },
         onError: (error) => {
             if (error.response?.data?.error) {
                 toast.error(error.response.data.error);
             } else {
-                toast.error('Something went wrong during registration');
+                toast.error('Something went wrong during login');
             }
         }
     });

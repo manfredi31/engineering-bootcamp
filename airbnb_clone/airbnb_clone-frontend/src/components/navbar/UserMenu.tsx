@@ -5,6 +5,7 @@ import MenuItem from "./MenuItem"
 import useRegisterModal from "../../hooks/useRegisterModal"
 import useLoginModal from "../../hooks/useLoginModal"
 import { useAuth } from "../../context/AuthContext"
+import useLogout from "../../hooks/useLogout"
 
 const UserMenu = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ const UserMenu = () => {
     const loginModal = useLoginModal();
 
     const {user, isLoading} = useAuth();
+    const { mutate: logout, isPending } = useLogout();
 
     
     const toggleOpen = useCallback(() => {
@@ -100,14 +102,20 @@ const UserMenu = () => {
                                 />
                                 <hr />
                                 <MenuItem
-                                    onClick={() => {}}
+                                    onClick={() => {
+                                        logout();
+                                        setIsOpen(false);
+                                    }}
                                     label="Logout"
                                 />
                             </>
                         ) : (
                             <>
                                 <MenuItem 
-                                    onClick={loginModal.onOpen}
+                                    onClick={() => {
+                                        loginModal.onOpen();
+                                        setIsOpen(false);
+                                    }}
                                     label="Login"
                                 />
                                 <MenuItem 

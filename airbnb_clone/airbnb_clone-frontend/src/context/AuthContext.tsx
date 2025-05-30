@@ -20,7 +20,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const { data:user, isLoading } = useCurrentUser();
+    const { data: user, isLoading } = useCurrentUser();
 
     return (
         <AuthContext.Provider value={{user, isLoading}}>

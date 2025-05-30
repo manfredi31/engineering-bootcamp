@@ -11,6 +11,7 @@ import { FcGoogle } from 'react-icons/fc'
 import { AiFillGithub } from 'react-icons/ai'
 import { useMutation } from '@tanstack/react-query'
 import useLoginModal from '../../hooks/useLoginModal'
+import { useQueryClient } from '@tanstack/react-query'
 
 interface LoginResponse {
     message: string;
@@ -19,6 +20,7 @@ interface LoginResponse {
 const LoginModal = () => {
     const registerModal = useRegisterModal();
     const loginModal = useLoginModal();
+    const queryClient = useQueryClient();
 
     const {
         register,
@@ -35,10 +37,11 @@ const LoginModal = () => {
 
     const { mutate, isPending } = useMutation<AxiosResponse<LoginResponse>, AxiosError<{error: string}>, FieldValues>({
         mutationFn: (data: FieldValues) => 
-            axios.post('http://127.0.0.1:5000/auth/login', data),
+            axios.post('http://127.0.0.1:5000/auth/login', data, {withCredentials: true}),
         onSuccess: () => {
             toast.success('Successfully loggedin!');
             loginModal.onClose();
+            queryClient.invalidateQueries({ queryKey: ["currentUser"]})
         },
         onError: (error) => {
             if (error.response?.data?.error) {

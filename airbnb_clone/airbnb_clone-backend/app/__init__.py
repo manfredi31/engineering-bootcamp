@@ -13,8 +13,14 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://manfredi:password@localhost:5434/airbnb_clone_db'  # <-- IMPORTANT: UPDATE THIS
     app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this in production!
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+    app.config["JWT_COOKIE_SECURE"] = True            # ✅ Only over HTTPS
+    app.config["JWT_ACCESS_COOKIE_PATH"] = "/"        # ✅ Cookie valid site-wide
+    app.config["JWT_COOKIE_CSRF_PROTECT"] = False     # (enable later if you want CSRF protection)
+    app.config["JWT_COOKIE_SAMESITE"] = "Strict"      # or "Lax" depending on your needs
+    app.config["JWT_ACCESS_COOKIE_NAME"] = "token"    # Optional: set custom name
 
-    CORS(app)
+    CORS(app, supports_credentials=True, origins=["http://127.0.0.1:5173"])
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)

@@ -36,6 +36,19 @@ class User(db.Model):
     def __repr__(self):
         return f'<User {self.name or self.id}>'
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "name": self.name,
+            "emailVerified": self.emailVerified,
+            "image": self.image,
+            "password_hash": self.password_hash,
+            "createdAt": self.createdAt,
+            "updatedAt": self.updatedAt,
+            "favoriteIds": self.favoriteIds,
+        }
+
 class Account(db.Model):
     __tablename__ = 'accounts'
 

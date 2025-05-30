@@ -2,8 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
-from .api import api_bp
-from .auth import auth_bp
+from flask_cors import CORS
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -15,12 +14,15 @@ def create_app():
     app.config['JWT_SECRET_KEY'] = 'super-secret'  # Change this in production!
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
+    CORS(app)
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
 
+    from .api import api_bp
     app.register_blueprint(api_bp)
+
+    from .auth import auth_bp
     app.register_blueprint(auth_bp)
 
     return app

@@ -1,7 +1,7 @@
 import { type FieldValues, type SubmitHandler, useForm } from 'react-hook-form'
 import useRegisterModal from "../../hooks/useRegisterModal"
 import axios from 'axios'
-import { useState } from 'react'
+import type { AxiosError, AxiosResponse } from 'axios'
 import Modal from './Modal'
 import Heading from '../Heading'
 import Input from '../inputs/Input'
@@ -9,10 +9,14 @@ import toast from 'react-hot-toast'
 import Button from '../Button'
 import { FcGoogle } from 'react-icons/fc'
 import { AiFillGithub } from 'react-icons/ai'
+import { useMutation } from '@tanstack/react-query'
+
+interface RegisterResponse {
+    message: string;
+}
 
 const RegisterModal = () => {
     const registerModal = useRegisterModal();
-    const [isLoading, setIsLoading] = useState(false);
 
     const {
         register,
@@ -28,19 +32,24 @@ const RegisterModal = () => {
         }
     })
 
-    const onSubmit: SubmitHandler<FieldValues> = (data) => {
-        setIsLoading(true);
+    const { mutate, isPending } = useMutation<AxiosResponse<RegisterResponse>, AxiosError<{error: string}>, FieldValues>({
+        mutationFn: (data: FieldValues) => 
+            axios.post('http://127.0.0.1:5000/auth/register', data),
+        onSuccess: () => {
+            toast.success('Successfully registered!');
+            registerModal.onClose();
+        },
+        onError: (error) => {
+            if (error.response?.data?.error) {
+                toast.error(error.response.data.error);
+            } else {
+                toast.error('Something went wrong during registration');
+            }
+        }
+    });
 
-        axios.post('api/register', data)
-            .then(() => {
-                registerModal.onClose();
-            })
-            .catch(() => {
-                toast.error("Something went wrong");
-            })
-            .finally(() => {
-                setIsLoading(false)
-            })
+    const onSubmit: SubmitHandler<FieldValues> = (data) => {
+        mutate(data);
     }
 
     const bodyContent = (
@@ -49,7 +58,7 @@ const RegisterModal = () => {
             <Input 
                 id="email"
                 label="Email"
-                disabled={isLoading}
+                disabled={isPending}
                 register={register}
                 errors={errors}
                 required
@@ -57,7 +66,7 @@ const RegisterModal = () => {
             <Input 
                 id="name"
                 label="Name"
-                disabled={isLoading}
+                disabled={isPending}
                 register={register}
                 errors={errors}
                 required
@@ -66,7 +75,7 @@ const RegisterModal = () => {
                 id="password"
                 label="Password"
                 type="password"
-                disabled={isLoading}
+                disabled={isPending}
                 register={register}
                 errors={errors}
                 required
@@ -115,7 +124,7 @@ const RegisterModal = () => {
 
     return (
         <Modal
-            disabled={isLoading}
+            disabled={isPending}
             isOpen={registerModal.isOpen}
             onSubmit={handleSubmit(onSubmit)}
             title="Register"
@@ -123,7 +132,6 @@ const RegisterModal = () => {
             onClose={registerModal.onClose}
             body={bodyContent}
             footer={footerContent}
-
         />
     )
 }

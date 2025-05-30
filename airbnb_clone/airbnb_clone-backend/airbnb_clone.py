@@ -1,4 +1,4 @@
-from app import create_app
+from app import create_app, db
 from app.models import User, Account, Listing, Reservation
 import sqlalchemy as sa
 import sqlalchemy.orm as so

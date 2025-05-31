@@ -6,11 +6,14 @@ import useRegisterModal from "../../hooks/useRegisterModal"
 import useLoginModal from "../../hooks/useLoginModal"
 import { useAuth } from "../../context/AuthContext"
 import useLogout from "../../hooks/useLogout"
+import useRentModal from "../../hooks/useRentModal"
+
 
 const UserMenu = () => {
     const [isOpen, setIsOpen] = useState(false);
     const registerModal = useRegisterModal();
     const loginModal = useLoginModal();
+    const rentModal = useRentModal();
 
     const {user, isLoading} = useAuth();
     const { mutate: logout, isPending } = useLogout();
@@ -20,11 +23,20 @@ const UserMenu = () => {
         setIsOpen((value) => !value);
     }, []);
 
+    const onRent = useCallback(() => {
+        if (!user) {
+            return loginModal.onOpen();
+        }
+        rentModal.onOpen();
+
+
+    }, [user]);
+
     return (
         <div className="relative">
             <div className="flex flex-row items-center gap-3">
                 <div
-                    onClick={() => {}}
+                    onClick={onRent}
                     className="
                         hidden
                         md:block
@@ -97,7 +109,7 @@ const UserMenu = () => {
                                     label="My properties"
                                 />
                                 <MenuItem
-                                    onClick={() => {}}
+                                    onClick={rentModal.onOpen}
                                     label="Airbnb my home"
                                 />
                                 <hr />

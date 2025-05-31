@@ -2,6 +2,7 @@ import Container from "../Container"
 import Logo from "./Logo"
 import Search from "./Search"
 import UserMenu from "./UserMenu"
+import Categories from "./Categories"
 
 export default function NavBar () {
     return (
@@ -24,9 +25,8 @@ export default function NavBar () {
                         <UserMenu /> 
                     </div>
                 </Container>
-
-
             </div>
+            <Categories />
         </div>
     )
     };

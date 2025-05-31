@@ -7,6 +7,7 @@ const Logo = () => {
 
     return (
         <Img
+            onClick={()=>navigate("/")}
             alt="Logo"
             className="hidden md:block cursor-pointer"
             height="150"

@@ -10,6 +10,8 @@ import Button from '../Button'
 import { FcGoogle } from 'react-icons/fc'
 import { AiFillGithub } from 'react-icons/ai'
 import { useMutation } from '@tanstack/react-query'
+import useLoginModal from '../../hooks/useLoginModal'
+import { useCallback } from 'react'
 
 interface RegisterResponse {
     message: string;
@@ -17,6 +19,7 @@ interface RegisterResponse {
 
 const RegisterModal = () => {
     const registerModal = useRegisterModal();
+    const loginModal = useLoginModal();
 
     const {
         register,
@@ -51,6 +54,11 @@ const RegisterModal = () => {
     const onSubmit: SubmitHandler<FieldValues> = (data) => {
         mutate(data);
     }
+
+    const toggle = useCallback(()=>{
+        registerModal.onClose();
+        loginModal.onOpen();}, 
+        [loginModal, registerModal]);
 
     const bodyContent = (
         <div className='flex flex-col gap-4'>
@@ -110,7 +118,9 @@ const RegisterModal = () => {
                         <div>
                             Already have an account?
                         </div>
-                        <div className="text-neutral-800 cursor-pointer hover:underline">
+                        <div 
+                            onClick={toggle}
+                            className="text-neutral-800 cursor-pointer hover:underline">
                             Log in
                         </div>
                     </div>

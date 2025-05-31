@@ -12,6 +12,7 @@ import { AiFillGithub } from 'react-icons/ai'
 import { useMutation } from '@tanstack/react-query'
 import useLoginModal from '../../hooks/useLoginModal'
 import { useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
 interface LoginResponse {
     message: string;
@@ -55,6 +56,11 @@ const LoginModal = () => {
     const onSubmit: SubmitHandler<FieldValues> = (data) => {
         mutate(data);
     }
+
+    const toggle = useCallback(()=>{
+        loginModal.onClose();
+        registerModal.onOpen();}, 
+        []);
 
     const bodyContent = (
         <div className='flex flex-col gap-4'>
@@ -104,10 +110,12 @@ const LoginModal = () => {
                 '
                 >   <div className="flex flex-row items-center justify-center gap-2"> 
                         <div>
-                            Don't have an account?
+                            First time using Airbnb?
                         </div>
-                        <div className="text-neutral-800 cursor-pointer hover:underline">
-                            Sign up
+                        <div 
+                            onClick={toggle}
+                            className="text-neutral-800 cursor-pointer hover:underline">
+                            Create an account
                         </div>
                     </div>
 

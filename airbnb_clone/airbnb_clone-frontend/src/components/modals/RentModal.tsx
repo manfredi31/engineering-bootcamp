@@ -1,11 +1,13 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, lazy, Suspense } from "react";
 import useRentModal from "../../hooks/useRentModal"
 import Modal from "./Modal"
 import Heading from "../Heading";
 import { categories } from "../navbar/Categories";
 import CategoryInput from "../inputs/CategoryInput";
-import { FieldValues, useForm } from "react-hook-form";
+import { type FieldValues, useForm } from "react-hook-form";
 import CountrySelect from "../inputs/CountrySelect";
+
+const Map = lazy(() => import("../Map"));
 
 enum STEPS {
     CATEGORY = 0,
@@ -43,6 +45,7 @@ const RentModal = () => {
 
     const category = watch('category');
     const location = watch('location')
+
 
     const setCustomValue = (id: string, value: any) => {
         setValue(id, value, {
@@ -115,7 +118,12 @@ const RentModal = () => {
                     <CountrySelect 
                         value={location}
                         onChange={(value) => setCustomValue('location', value)}
-                        />   
+                        /> 
+                    <Suspense fallback={<div>Loading map...</div>}>
+                        <Map 
+                            center={location?.latlng}
+                        />
+                    </Suspense>
             </div>
         )
     }

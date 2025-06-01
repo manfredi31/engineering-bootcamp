@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+import cloudinary
+import cloudinary.uploader
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -19,6 +21,11 @@ def create_app():
     app.config["JWT_COOKIE_CSRF_PROTECT"] = False     # (enable later if you want CSRF protection)
     app.config["JWT_COOKIE_SAMESITE"] = "Strict"      # or "Lax" depending on your needs
     app.config["JWT_ACCESS_COOKIE_NAME"] = "token"    # Optional: set custom name
+    cloudinary.config(
+        cloud_name="dvgdqljso",
+        api_key="983739858367159",
+        api_secret="CPuw3OnhkWBdnI2NfZZCSiTlWXM"
+    )
 
     CORS(app, supports_credentials=True, origins=["http://127.0.0.1:5173"])
     db.init_app(app)

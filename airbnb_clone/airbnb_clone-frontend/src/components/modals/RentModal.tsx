@@ -10,6 +10,9 @@ import Counter from "../inputs/Counter";
 import ImageUpload from "../inputs/ImageUpload";
 import Input from "../inputs/Input";
 import { data } from "react-router-dom";
+import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const Map = lazy(() => import("../Map"));
 
@@ -86,13 +89,30 @@ const RentModal = () => {
         return 'Back';
     }, [step])
 
-    const onSubmit: SubmitHandler<FieldValues> = (data) => {
-        if (step !== STEPS.PRICE) {}
-            return onNext();
-        
-            setIsLoading(true);
+    const mutation = useMutation({
+        mutationFn: (listingData: FieldValues) => {
+            return axios.post('http://127.0.0.1:5000/api/listing', listingData, {withCredentials: true});
+        },
+        onSuccess: () => {
+            toast.success('Listing Created!');
+            reset();
+            setStep(STEPS.CATEGORY);
+            rentModal.onClose();
+            setIsLoading(false);
+        },
+        onError: () => {
+            toast.error('Something went wrong');
+            setIsLoading(false);
+        }
+    });
 
-            ///api call
+    const onSubmit: SubmitHandler<FieldValues> = (data) => {
+        if (step !== STEPS.PRICE) {
+            return onNext();
+        }
+
+        setIsLoading(true);
+        mutation.mutate(data);
     }
 
 
@@ -250,7 +270,7 @@ const RentModal = () => {
         <Modal
             isOpen={rentModal.isOpen}
             onClose={rentModal.onClose}
-            onSubmit={onNext}
+            onSubmit={handleSubmit(onSubmit)}
             title="Airbnb your home"
             actionLabel={actionLabel}
             secondaryActionLabel={secondaryActionLabel}

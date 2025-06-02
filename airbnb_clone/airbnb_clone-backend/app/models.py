@@ -41,12 +41,11 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             "name": self.name,
-            "emailVerified": self.emailVerified,
+            "emailVerified": self.emailVerified.isoformat() if self.emailVerified else None,
             "image": self.image,
-            "password_hash": self.password_hash,
-            "createdAt": self.createdAt,
-            "updatedAt": self.updatedAt,
-            "favoriteIds": self.favoriteIds,
+            "createdAt": self.createdAt.isoformat(),
+            "updatedAt": self.updatedAt.isoformat(),
+            "favoriteIds": self.favoriteIds
         }
 
 class Account(db.Model):
@@ -109,7 +108,8 @@ class Listing(db.Model):
             "guestCount": self.guestCount,
             "locationValue": self.locationValue,
             "price": self.price,
-            "userId": self.userId
+            "userId": self.userId,
+            "user": self.user.serialize() if self.user else None
         }
 
 class Reservation(db.Model):

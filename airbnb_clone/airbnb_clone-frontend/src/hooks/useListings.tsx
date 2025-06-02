@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import type { User } from "../context/AuthContext";
 
 export const LISTINGS_QUERY_KEY = ["listings"] as const;
 
@@ -17,6 +18,7 @@ export interface Listing {
     price: number;
     createdAt: string;
     updatedAt: string;
+    user: User
 }
 
 const useListings = () => {

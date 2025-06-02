@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import type { User } from "../context/AuthContext"
 import HeartButton from "./HeartButton";
 import Button from "./Button";
+import { User } from "../context/AuthContext";
 
 // These interfaces should match the Flask backend's data structure
 interface Listing {
@@ -21,6 +22,7 @@ interface Listing {
   locationValue: string;
   price: number;
   userId: string;
+  user: User
 }
 
 interface Reservation {

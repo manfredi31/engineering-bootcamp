@@ -3,9 +3,14 @@ import type { ReactNode } from "react";
 import useCurrentUser from "../hooks/useCurrentUser";
 
 export interface User {
-    id: number;
-    email: string;
-    // Add other user properties as needed
+    id: string;  // Changed from number to string as it's a UUID in the backend
+    email: string | null;  // Can be null as it's nullable in the backend
+    name: string | null;  // Can be null as it's nullable in the backend
+    emailVerified: string | null;  // ISO date string or null
+    image: string | null;  // Can be null as it's nullable in the backend
+    createdAt: string;  // ISO date string
+    updatedAt: string;  // ISO date string
+    favoriteIds: string[] | null;  // Can be null as it's nullable in the backend
 }
 
 interface AuthContextType {

@@ -13,7 +13,7 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({
     label,
     icon: Icon,
     description,
-    selected = false
+    selected
 }) => {
 
     const [ searchParams, setSearchParams ] = useSearchParams();
@@ -25,7 +25,6 @@ const CategoryBox: React.FC<CategoryBoxProps> = ({
             newParams.delete('category')
         } else {
             newParams.set('category', label);
-            selected=!!selected
         }
 
         setSearchParams(newParams)

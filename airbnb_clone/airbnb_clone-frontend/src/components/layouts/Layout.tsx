@@ -6,14 +6,18 @@ import RentModal from '../modals/RentModal'
 
 export default function Layout () {
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="flex min-h-screen flex-col">
             <LoginModal />
             <RentModal />
             <RegisterModal/>
             <NavBar/>
-            <main className="flex-1 max-w-7xl mx-auto p-5 w-full">
-                <Outlet />
+            <main className="flex-1">
+                <div className='pb-20 pt-28'>
+                    <Outlet />
+                </div>
+                
             </main>
+
         </div>
     )
 }

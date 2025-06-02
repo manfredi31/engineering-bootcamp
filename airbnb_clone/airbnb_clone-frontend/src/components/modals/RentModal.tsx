@@ -10,9 +10,10 @@ import Counter from "../inputs/Counter";
 import ImageUpload from "../inputs/ImageUpload";
 import Input from "../inputs/Input";
 import { data } from "react-router-dom";
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { LISTINGS_QUERY_KEY } from "../../hooks/useListings";
 
 const Map = lazy(() => import("../Map"));
 
@@ -29,6 +30,7 @@ const RentModal = () => {
     const rentModal = useRentModal();
     const [step, setStep] = useState(STEPS.CATEGORY)
     const [isLoading, setIsLoading] = useState(false);
+    const queryClient = useQueryClient();
 
     const {
         register,
@@ -95,6 +97,7 @@ const RentModal = () => {
         },
         onSuccess: () => {
             toast.success('Listing Created!');
+            queryClient.invalidateQueries({ queryKey: LISTINGS_QUERY_KEY });
             reset();
             setStep(STEPS.CATEGORY);
             rentModal.onClose();

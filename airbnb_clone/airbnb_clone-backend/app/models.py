@@ -96,6 +96,22 @@ class Listing(db.Model):
     def __repr__(self):
         return f'<Listing {self.title}>'
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "imageSrc": self.imageSrc,
+            "createdAt": self.createdAt.isoformat(),
+            "category": self.category,
+            "roomCount": self.roomCount,
+            "bathroomCount": self.bathroomCount,
+            "guestCount": self.guestCount,
+            "locationValue": self.locationValue,
+            "price": self.price,
+            "userId": self.userId
+        }
+
 class Reservation(db.Model):
     __tablename__ = 'reservations'
 

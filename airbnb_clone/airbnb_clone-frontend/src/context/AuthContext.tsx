@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
 import useCurrentUser from "../hooks/useCurrentUser";
 
-interface User {
+export interface User {
     id: number;
     email: string;
     // Add other user properties as needed
@@ -11,6 +11,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
+    isLoggedIn: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -23,7 +24,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const { data: user, isLoading } = useCurrentUser();
 
     return (
-        <AuthContext.Provider value={{user, isLoading}}>
+        <AuthContext.Provider value={{user, isLoading, isLoggedIn: !!user}}>
             {children}
         </AuthContext.Provider>
     );
@@ -36,3 +37,4 @@ export const useAuth = () => {
     }
     return context;
 }
+

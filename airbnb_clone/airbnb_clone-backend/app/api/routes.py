@@ -61,4 +61,14 @@ def upload_image():
     result = cloudinary.uploader.upload(file)
     return jsonify({"url": result["secure_url"]})
 
+@api_bp.route('/listings', methods=["GET"])
+def get_listings():
+    listings = Listing.query.all()
+    return jsonify([listing.serialize() for listing in listings])
+
+@api_bp.route('/listings/<string:listing_id>', methods=["GET"])
+def get_listing(listing_id):
+    listing = Listing.query.get_or_404(listing_id)
+    return jsonify(listing.serialize())
+
 

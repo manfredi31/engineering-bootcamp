@@ -2,8 +2,9 @@ from . import api_bp
 from flask import request, jsonify
 import cloudinary.uploader
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ..models import db, Listing
+from ..models import db, Listing, Reservation
 import uuid
+from datetime import datetime
 
 @api_bp.route('/')
 def index():
@@ -70,5 +71,68 @@ def get_listings():
 def get_listing(listing_id):
     listing = Listing.query.get_or_404(listing_id)
     return jsonify(listing.serialize())
+
+@api_bp.route('/reservations', methods=["GET"])
+def get_reservations():
+    reservations = Reservation.query.all()
+    return jsonify([reservation.serialize() for reservation in reservations])
+
+@api_bp.route('/listings/<string:listing_id>/reservations', methods=["GET"])
+def get_listing_reservations(listing_id):
+    reservations = Reservation.query.filter_by(listingId=listing_id).all()
+    return jsonify([reservation.serialize() for reservation in reservations])
+
+@api_bp.route('/reservations', methods=["POST"])
+@jwt_required()
+def create_reservation():
+    user_id = get_jwt_identity()
+    
+    body = request.get_json()
+    print("Received reservation body:", body)  # Debug print
+    
+    # Validate required fields
+    required_fields = ['totalPrice', 'startDate', 'endDate', 'listingId']
+    for field in required_fields:
+        if field not in body:
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    
+    # Convert date strings to datetime objects
+    try:
+        start_date = datetime.fromisoformat(body['startDate'].replace('Z', '+00:00'))
+        end_date = datetime.fromisoformat(body['endDate'].replace('Z', '+00:00'))
+    except ValueError:
+        return jsonify({"error": "Invalid date format"}), 400
+    
+    # Validate that listing exists
+    listing = Listing.query.get(body['listingId'])
+    if not listing:
+        return jsonify({"error": "Listing not found"}), 404
+    
+    # Create new reservation
+    new_reservation = Reservation(
+        id=str(uuid.uuid4()),
+        startDate=start_date,
+        endDate=end_date,
+        totalPrice=int(body['totalPrice']),
+        userId=user_id,
+        listingId=body['listingId']
+    )
+    
+    # Add and commit to database
+    db.session.add(new_reservation)
+    db.session.commit()
+    
+    return jsonify({
+        "message": "Reservation created successfully",
+        "reservation": {
+            "id": new_reservation.id,
+            "startDate": new_reservation.startDate.isoformat(),
+            "endDate": new_reservation.endDate.isoformat(),
+            "totalPrice": new_reservation.totalPrice,
+            "createdAt": new_reservation.createdAt.isoformat(),
+            "userId": new_reservation.userId,
+            "listingId": new_reservation.listingId
+        }
+    }), 201
 
 

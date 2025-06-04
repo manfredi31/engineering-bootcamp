@@ -1,24 +1,124 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import useListing from "./hooks/useListing";
 import Container from "./components/Container";
 import EmptyState from "./components/EmptyState";
 import useCountries from "./hooks/useCountries";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { categories } from "./components/navbar/Categories";
 import { useAuth } from "./context/AuthContext";
+import type { User } from "./context/AuthContext";
 import ListingHead from "./components/ListingHead";
 import ListingInfo from "./components/ListingInfo";
+import type { Reservation } from "./components/ListingCard";
+import type { Listing } from "./hooks/useListings";
+import useLoginModal from "./hooks/useLoginModal";
+import { eachDayOfInterval, differenceInCalendarDays } from "date-fns";
+import useCreateReservation from "./hooks/useReservation";
+import ListingReservation from "./ListingReservation";
+import type { Range as CalendarRange } from "react-date-range";
 
-export default function Listing() {
+interface DateRange extends CalendarRange {
+    startDate: Date;
+    endDate: Date;
+    key: string;
+}
+
+interface ListingPageProps {
+    reservations?: Reservation[];
+}
+
+const ListingPage: React.FC<ListingPageProps> = ({
+    reservations = []
+}) => {
     const { id } = useParams();
-    const { data: listing, isLoading, error } = useListing(id || "");
+    const { data: currentListing, isLoading, error } = useListing(id || "");
     const { getByValue } = useCountries();
+
+    const loginModal = useLoginModal();
+    const navigate = useNavigate();
+    
+    // State for reservation
+    const [reservationLoading, setReservationLoading] = useState(false);
+    const [totalPrice, setTotalPrice] = useState(0);
+    const [dateRange, setDateRange] = useState({
+        startDate: new Date(),
+        endDate: new Date(),
+        key: 'selection'
+    });
+    
+    // Reservation mutation
+    const createReservationMutation = useCreateReservation();
+
+    const disabledDates = useMemo(() => {
+        let dates: Date[] = [];
+
+        reservations.forEach((reservation) => {
+            const range = eachDayOfInterval({
+                start: new Date(reservation.startDate),
+                end: new Date(reservation.endDate)
+            });
+
+            dates = [...dates, ...range]
+        })
+
+        return dates;
+    }, [reservations])
+
     const category = useMemo(() => {
         return categories.find((item) =>
-        item.label === listing?.category);
-    }, [listing?.category])
+        item.label === currentListing?.category);
+    }, [currentListing?.category])
 
     const { user } = useAuth();
+
+    useEffect(() => {
+        if (dateRange.startDate && dateRange.endDate) {
+            const dayCount = differenceInCalendarDays(
+                dateRange.endDate,
+                dateRange.startDate
+            );
+            
+            if (dayCount && currentListing?.price) {
+                setTotalPrice(dayCount * currentListing.price);
+            } else {
+                setTotalPrice(currentListing?.price || 0);
+            }
+        }
+    }, [dateRange, currentListing?.price]);
+
+    const handleCreateReservation = () => {
+        if (!user) {
+            loginModal.onOpen();
+            return;
+        }
+
+        if (!currentListing) {
+            return;
+        }
+
+        setReservationLoading(true);
+
+        createReservationMutation.mutate({
+            totalPrice,
+            startDate: dateRange.startDate.toISOString(),
+            endDate: dateRange.endDate.toISOString(),
+            listingId: currentListing.id.toString()
+        }, {
+            onSuccess: () => {
+                setReservationLoading(false);
+                // Reset form
+                setDateRange({
+                    startDate: new Date(),
+                    endDate: new Date(),
+                    key: 'selection'
+                });
+                setTotalPrice(0);
+            },
+            onError: () => {
+                setReservationLoading(false);
+            }
+        });
+    };
 
     if (isLoading) {
         return (
@@ -38,7 +138,7 @@ export default function Listing() {
         );
     }
 
-    if (!listing) {
+    if (!currentListing) {
         return (
             <EmptyState
                 title="No listing found"
@@ -47,17 +147,17 @@ export default function Listing() {
         );
     }
 
-    const location = getByValue(listing.locationValue);
+    const location = getByValue(currentListing.locationValue);
 
     return (
         <Container>
             <div className="max-w-screen-lg mx-auto">
                 <div className="flex flex-col gap-6">
                     <ListingHead
-                        title={listing.title}
-                        imageSrc={listing.imageSrc}
-                        locationValue={listing.locationValue}
-                        id={listing.id}
+                        title={currentListing.title}
+                        imageSrc={currentListing.imageSrc}
+                        locationValue={currentListing.locationValue}
+                        id={currentListing.id}
                         currentUser={user}
                     />
                     <div className="
@@ -68,14 +168,41 @@ export default function Listing() {
                         mt-6
                     ">
                         <ListingInfo
-                            user={listing.user}
+                            user={currentListing.user}
                             category={category}
-                            description={listing.description}
-                            roomCount={listing.roomCount}
-                            guestCount={listing.guestCount}
-                            bathroomCount={listing.bathroomCount}
-                            locationValue={listing.locationValue}
+                            description={currentListing.description}
+                            roomCount={currentListing.roomCount}
+                            guestCount={currentListing.guestCount}
+                            bathroomCount={currentListing.bathroomCount}
+                            locationValue={currentListing.locationValue}
                             ></ListingInfo>
+                            <div
+                                className="
+                                    order-first
+                                    mb-10
+                                    md:order-last
+                                    md:col-span-3
+                                "
+                            >
+                                <ListingReservation
+                                    price={currentListing.price}
+                                    totalPrice={totalPrice}
+                                    onChangeDate={(value) => {
+                                        if (value.startDate && value.endDate) {
+                                            setDateRange({
+                                                startDate: value.startDate,
+                                                endDate: value.endDate,
+                                                key: value.key || 'selection'
+                                            });
+                                        }
+                                    }}
+                                    dateRange={dateRange}
+                                    onSubmit={handleCreateReservation}
+                                    disabled={reservationLoading}
+                                    disabledDates={disabledDates}
+                                >
+                                </ListingReservation>
+                            </div>
                     </div>
                     </div>
 
@@ -86,3 +213,5 @@ export default function Listing() {
         </Container>
     );
 }
+
+export default ListingPage;

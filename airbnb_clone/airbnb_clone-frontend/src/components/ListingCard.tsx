@@ -25,7 +25,7 @@ interface Listing {
   user: User
 }
 
-interface Reservation {
+export interface Reservation {
   id: string;
   startDate: string;
   endDate: string;

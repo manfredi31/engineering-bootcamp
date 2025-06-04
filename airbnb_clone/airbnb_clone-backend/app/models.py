@@ -131,3 +131,16 @@ class Reservation(db.Model):
 
     def __repr__(self):
         return f'<Reservation {self.id} ({self.startDate} - {self.endDate})>'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "startDate": self.startDate.isoformat(),
+            "endDate": self.endDate.isoformat(),
+            "totalPrice": self.totalPrice,
+            "createdAt": self.createdAt.isoformat(),
+            "userId": self.userId,
+            "listingId": self.listingId,
+            "user": self.user.serialize() if self.user else None,
+            "listing": self.listing.serialize() if self.listing else None
+        }

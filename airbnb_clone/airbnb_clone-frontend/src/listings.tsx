@@ -16,6 +16,8 @@ import { eachDayOfInterval, differenceInCalendarDays } from "date-fns";
 import useCreateReservation from "./hooks/useReservation";
 import ListingReservation from "./ListingReservation";
 import type { Range as CalendarRange } from "react-date-range";
+import useListingReservations, { LISTING_RESERVATIONS_QUERY_KEY } from "./hooks/useListingReservations";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface DateRange extends CalendarRange {
     startDate: Date;
@@ -23,16 +25,14 @@ interface DateRange extends CalendarRange {
     key: string;
 }
 
-interface ListingPageProps {
-    reservations?: Reservation[];
-}
+interface ListingPageProps {}
 
-const ListingPage: React.FC<ListingPageProps> = ({
-    reservations = []
-}) => {
+const ListingPage: React.FC<ListingPageProps> = () => {
     const { id } = useParams();
     const { data: currentListing, isLoading, error } = useListing(id || "");
+    const { data: reservations = [], isLoading: reservationsLoading, error: reservationsError } = useListingReservations(id || "");
     const { getByValue } = useCountries();
+    const queryClient = useQueryClient();
 
     const loginModal = useLoginModal();
     const navigate = useNavigate();
@@ -98,10 +98,18 @@ const ListingPage: React.FC<ListingPageProps> = ({
 
         setReservationLoading(true);
 
+        // Extract local calendar dates as YYYY-MM-DD strings to prevent timezone shifting
+        const formatLocalDate = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         createReservationMutation.mutate({
             totalPrice,
-            startDate: dateRange.startDate.toISOString(),
-            endDate: dateRange.endDate.toISOString(),
+            startDate: formatLocalDate(dateRange.startDate),
+            endDate: formatLocalDate(dateRange.endDate),
             listingId: currentListing.id.toString()
         }, {
             onSuccess: () => {
@@ -113,6 +121,11 @@ const ListingPage: React.FC<ListingPageProps> = ({
                     key: 'selection'
                 });
                 setTotalPrice(0);
+                
+                // Invalidate and refetch reservations to update disabled dates
+                queryClient.invalidateQueries({
+                    queryKey: [LISTING_RESERVATIONS_QUERY_KEY, id]
+                });
             },
             onError: () => {
                 setReservationLoading(false);
@@ -134,6 +147,15 @@ const ListingPage: React.FC<ListingPageProps> = ({
             <EmptyState
                 title="Error"
                 subtitle="Something went wrong while fetching the listing"
+            />
+        );
+    }
+
+    if (reservationsError) {
+        return (
+            <EmptyState
+                title="Error"
+                subtitle="Something went wrong while fetching reservations"
             />
         );
     }
@@ -211,7 +233,7 @@ const ListingPage: React.FC<ListingPageProps> = ({
 
           
         </Container>
-    );
+    ); 
 }
 
 export default ListingPage;

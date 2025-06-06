@@ -98,10 +98,17 @@ def create_reservation():
     
     # Convert date strings to datetime objects
     try:
-        start_date = datetime.fromisoformat(body['startDate'].replace('Z', '+00:00'))
-        end_date = datetime.fromisoformat(body['endDate'].replace('Z', '+00:00'))
+        # Handle date-only strings (YYYY-MM-DD format) to prevent timezone issues
+        # Parse as dates at midnight UTC to preserve the calendar date
+        start_date = datetime.strptime(body['startDate'], '%Y-%m-%d')
+        end_date = datetime.strptime(body['endDate'], '%Y-%m-%d')
     except ValueError:
-        return jsonify({"error": "Invalid date format"}), 400
+        # Fallback to handle ISO format if needed
+        try:
+            start_date = datetime.fromisoformat(body['startDate'].replace('Z', '+00:00'))
+            end_date = datetime.fromisoformat(body['endDate'].replace('Z', '+00:00'))
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Expected YYYY-MM-DD"}), 400
     
     # Validate that listing exists
     listing = Listing.query.get(body['listingId'])

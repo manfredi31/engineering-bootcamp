@@ -3,6 +3,7 @@ import NavBar from '../navbar/NavBar'
 import RegisterModal from '../modals/RegisterModal'
 import LoginModal from '../modals/LoginModal'
 import RentModal from '../modals/RentModal'
+import SearchModal from '../modals/SearchModal'
 
 export default function Layout () {
     return (
@@ -10,6 +11,7 @@ export default function Layout () {
             <LoginModal />
             <RentModal />
             <RegisterModal/>
+            <SearchModal/>
             <NavBar/>
             <main className="flex-1">
                 <div className='pb-20 pt-28'>

@@ -14,18 +14,39 @@ export interface Listing {
     bathroomCount: number;
     guestCount: number;
     locationValue: string;
-    userId: number;
+    userId: string;
     price: number;
     createdAt: string;
     updatedAt: string;
     user: User
 }
 
-const useListings = () => {
+interface ListingFilters {
+    locationValue?: string;
+    guestCount?: number;
+    roomCount?: number;
+    bathroomCount?: number;
+    startDate?: string;
+    endDate?: string;
+    category?: string;
+}
+
+const useListings = (filters?: ListingFilters) => {
     return useQuery<Listing[]>({
-        queryKey: LISTINGS_QUERY_KEY,
+        queryKey: [...LISTINGS_QUERY_KEY, filters],
         queryFn: async () => {
-            const response = await axios.get("http://127.0.0.1:5000/api/listings");
+            const params = new URLSearchParams();
+            
+            if (filters) {
+                Object.entries(filters).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null && value !== '') {
+                        params.append(key, value.toString());
+                    }
+                });
+            }
+            
+            const url = `http://127.0.0.1:5000/api/listings${params.toString() ? `?${params.toString()}` : ''}`;
+            const response = await axios.get(url);
             return response.data;
         }
     });

@@ -1,8 +1,12 @@
 import { BiSearch } from 'react-icons/bi'
+import useSearchModal from '../../hooks/usSearchModal'
 
 const Search = () => {
+    const searchModal = useSearchModal();
+
     return (
         <div
+            onClick={searchModal.onOpen}
             className="
                 border-[1px]
                 w-full

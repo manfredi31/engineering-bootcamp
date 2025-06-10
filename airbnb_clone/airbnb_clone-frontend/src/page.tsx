@@ -3,9 +3,40 @@ import EmptyState from "./components/EmptyState";
 import ListingCard from "./components/ListingCard";
 import useListings from "./hooks/useListings";
 import type { Listing } from "./hooks/useListings";
+import { useSearchParams } from "react-router-dom";
+import { useMemo } from "react";
 
 export default function Home() {
-    const { data: listings, isLoading, error } = useListings();
+    const [searchParams, setSearchParams] = useSearchParams();
+    
+    // Build filters object from URL search parameters
+    const filters = useMemo(() => {
+        const filtersObj: any = {};
+        
+        const locationValue = searchParams.get('locationValue');
+        const guestCount = searchParams.get('guestCount');
+        const roomCount = searchParams.get('roomCount');
+        const bathroomCount = searchParams.get('bathroomCount');
+        const startDate = searchParams.get('startDate');
+        const endDate = searchParams.get('endDate');
+        const category = searchParams.get('category');
+        
+        if (locationValue) filtersObj.locationValue = locationValue;
+        if (guestCount) filtersObj.guestCount = parseInt(guestCount);
+        if (roomCount) filtersObj.roomCount = parseInt(roomCount);
+        if (bathroomCount) filtersObj.bathroomCount = parseInt(bathroomCount);
+        if (startDate) filtersObj.startDate = startDate;
+        if (endDate) filtersObj.endDate = endDate;
+        if (category) filtersObj.category = category;
+        
+        return Object.keys(filtersObj).length > 0 ? filtersObj : undefined;
+    }, [searchParams]);
+
+    const { data: listings, isLoading, error } = useListings(filters);
+
+    const handleReset = () => {
+        setSearchParams({});
+    };
 
     if (isLoading) {
         return (
@@ -31,6 +62,7 @@ export default function Home() {
                 showReset
                 title="No listings found"
                 subtitle="Try adjusting your filters"
+                onReset={handleReset}
             />
         );
     }

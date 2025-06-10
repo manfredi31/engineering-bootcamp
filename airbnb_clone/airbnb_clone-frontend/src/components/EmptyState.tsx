@@ -6,14 +6,24 @@ interface EmptyStateProps {
     title?: string;
     subtitle?: string
     showReset?: boolean;
+    onReset?: () => void;
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
     title = "No exact matches",
     subtitle = "Try changing or removing some of your filters",
-    showReset
+    showReset,
+    onReset
 }) => {
     const navigate = useNavigate();
+
+    const handleReset = () => {
+        if (onReset) {
+            onReset();
+        } else {
+            navigate("/");
+        }
+    };
 
     return (
         <div className="
@@ -36,7 +46,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
                         <Button
                             outline
                             label="Remove all filters"
-                            onClick={()=> navigate("/")}
+                            onClick={handleReset}
                         ></Button>
 
                     )}

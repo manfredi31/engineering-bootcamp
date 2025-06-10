@@ -64,7 +64,64 @@ def upload_image():
 
 @api_bp.route('/listings', methods=["GET"])
 def get_listings():
-    listings = Listing.query.all()
+    # Get query parameters
+    location_value = request.args.get('locationValue')
+    guest_count = request.args.get('guestCount', type=int)
+    room_count = request.args.get('roomCount', type=int)
+    bathroom_count = request.args.get('bathroomCount', type=int)
+    start_date_str = request.args.get('startDate')
+    end_date_str = request.args.get('endDate')
+    category = request.args.get('category')
+    
+    # Start with base query
+    query = Listing.query
+    
+    # Apply location filter
+    if location_value and location_value != "undefined":
+        query = query.filter(Listing.locationValue == location_value)
+    
+    # Apply category filter
+    if category:
+        query = query.filter(Listing.category == category)
+    
+    # Apply capacity filters (listing must have at least the requested capacity)
+    if guest_count:
+        query = query.filter(Listing.guestCount >= guest_count)
+    
+    if room_count:
+        query = query.filter(Listing.roomCount >= room_count)
+    
+    if bathroom_count:
+        query = query.filter(Listing.bathroomCount >= bathroom_count)
+    
+    # Apply date availability filter
+    if start_date_str and end_date_str:
+        try:
+            # Parse ISO format dates (e.g., "2025-06-09T00:00:00+02:00")
+            start_date_parsed = datetime.fromisoformat(start_date_str.replace('Z', '+00:00'))
+            end_date_parsed = datetime.fromisoformat(end_date_str.replace('Z', '+00:00'))
+            
+            # Convert to timezone-naive dates (strip timezone info) and extract date only
+            # This ensures we compare apples to apples with database dates
+            start_date = start_date_parsed.replace(tzinfo=None).date()
+            end_date = end_date_parsed.replace(tzinfo=None).date()
+            
+            # Find listings that have NO overlapping reservations
+            # A reservation overlaps if: reservation.startDate < requested_end_date AND reservation.endDate > requested_start_date
+            # Using date() to ensure we compare dates only, not datetime with time components
+            overlapping_reservations = db.session.query(Reservation.listingId).filter(
+                db.func.date(Reservation.startDate) < end_date,
+                db.func.date(Reservation.endDate) > start_date
+            ).distinct()
+            
+            # Exclude listings that have overlapping reservations
+            query = query.filter(~Listing.id.in_(overlapping_reservations))
+            
+        except ValueError:
+            # If date parsing fails, ignore date filter
+            pass
+    
+    listings = query.all()
     return jsonify([listing.serialize() for listing in listings])
 
 @api_bp.route('/listings/<string:listing_id>', methods=["GET"])

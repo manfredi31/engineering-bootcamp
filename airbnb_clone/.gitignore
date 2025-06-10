@@ -1,0 +1,4 @@
+airbnb_clone-backend/pgdata/
+airbnb_clone-backend/node_modules/
+.specstory/**
+airbnb_clone-frontend/node_modules/
